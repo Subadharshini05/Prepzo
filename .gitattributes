@@ -1,0 +1,27 @@
+/**
+ * .gitattributes
+ * Git configuration for file handling
+ */
+
+# Auto detect text files and normalize line endings to LF
+* text=auto
+
+# Source files
+*.js eol=lf
+*.jsx eol=lf
+*.json eol=lf
+*.css eol=lf
+*.md eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+
+# Ensure these are always treated as text files
+.gitattributes text
+.gitignore text
+*.md text
+*.json text

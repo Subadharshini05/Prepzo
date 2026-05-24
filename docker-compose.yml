@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: prepzo_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_NAME:-prepzo_dev}
+      MYSQL_USER: ${DB_USER:-prepzo_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-prepzo_password}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - prepzo_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: prepzo_server
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 5000
+      DATABASE_URL: mysql://${DB_USER:-prepzo_user}:${DB_PASSWORD:-prepzo_password}@db:3306/${DB_NAME:-prepzo_dev}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_change_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your_jwt_refresh_secret_key_change_in_production}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./server/src:/app/src
+      - ./server/uploads:/app/src/uploads
+    networks:
+      - prepzo_network
+    restart: unless-stopped
+
+  # Frontend Application
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: prepzo_client
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - prepzo_network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  prepzo_network:
+    driver: bridge

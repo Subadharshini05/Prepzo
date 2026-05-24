@@ -1,0 +1,204 @@
+// Prepzo Database Schema
+// Defines all data models and relationships
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ USER MODELS ============
+// User Model - Represents regular application users
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  firstName String?
+  lastName  String?
+  phone     String?
+  avatar    String?
+  bio       String?
+  role      String    @default("user") // "user", "recruiter"
+  isActive  Boolean   @default(true)
+  
+  // Relations
+  resumes         Resume[]
+  skills          UserSkill[]
+  recommendations Recommendation[]
+  progress        Progress[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([email])
+  @@index([role])
+}
+
+// Admin Model - Represents admin users with special privileges
+model Admin {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  firstName String
+  lastName  String
+  role      String    @default("admin") // "admin", "super_admin"
+  isActive  Boolean   @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([email])
+  @@index([role])
+}
+
+// ============ RESUME MODELS ============
+// Resume Model - Represents user resumes/CVs
+
+model Resume {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  title           String
+  description     String?
+  filePath        String?
+  fileName        String?
+  fileUrl         String?
+  extractedText   String?
+  status          String    @default("draft") // "draft", "published", "archived"
+  isDefault       Boolean   @default(false)
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeSkills    ResumeSkill[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([isDefault])
+}
+
+// ============ SKILL MODELS ============
+// Skill Model - Represents technical and professional skills
+
+model Skill {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  category    String?     // "technical", "soft", "language", etc.
+  description String?
+  
+  // Relations
+  userSkills  UserSkill[]
+  resumeSkills ResumeSkill[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([category])
+}
+
+// UserSkill Model - Junction table for User-Skill relationship with proficiency level
+model UserSkill {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  skillId     Int
+  level       String    // "beginner", "intermediate", "advanced", "expert"
+  yearsExperience Float?
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill       Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+  @@index([level])
+}
+
+// ResumeSkill Model - Junction table for Resume-Skill relationship
+model ResumeSkill {
+  id          Int       @id @default(autoincrement())
+  resumeId    Int
+  skillId     Int
+  proficiency String?   // Additional proficiency info
+  
+  // Relations
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  skill       Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([resumeId, skillId])
+  @@index([resumeId])
+  @@index([skillId])
+}
+
+// ============ RECOMMENDATION MODELS ============
+// Recommendation Model - Represents skill recommendations for users
+
+model Recommendation {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  skillName   String
+  reason      String
+  priority    String    @default("medium") // "low", "medium", "high"
+  status      String    @default("pending") // "pending", "accepted", "rejected"
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+}
+
+// ============ PROGRESS MODELS ============
+// Progress Model - Tracks user progress in skill development
+
+model Progress {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  skillName   String
+  milestone   String    // "started", "50%", "completed"
+  description String?
+  completionPercentage Int @default(0)
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([skillName])
+}
+
+// ============ AUDIT MODELS ============
+// AuditLog Model - Tracks all user actions for security and audit purposes
+
+model AuditLog {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+  action      String    // "login", "logout", "create", "update", "delete"
+  entityType  String?   // "resume", "skill", "user", etc.
+  entityId    Int?
+  changes     String?
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
