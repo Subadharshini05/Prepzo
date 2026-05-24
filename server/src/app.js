@@ -10,9 +10,13 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 
 // Import middleware
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+
+// Import routes
+import authRoutes from './routes/auth.routes.js';
 
 const app = express();
 
@@ -49,6 +53,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 /**
+ * Cookie Parser Middleware
+ */
+app.use(cookieParser());
+
+/**
  * Rate Limiting
  */
 const limiter = rateLimit({
@@ -70,7 +79,7 @@ app.get('/health', (req, res) => {
 });
 
 /**
- * API Routes (Will be added as features are implemented)
+ * API Info Route
  */
 app.get('/api', (req, res) => {
   res.status(200).json({
@@ -85,8 +94,10 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Route placeholder
-// app.use('/api/auth', authRoutes);
+/**
+ * API Routes
+ */
+app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
 // app.use('/api/resumes', resumeRoutes);
 
