@@ -9,6 +9,12 @@ import { generateAccessToken, generateRefreshToken, verifyAccessToken } from '..
 
 const prisma = getPrismaClient();
 
+const createAppError = (message, statusCode) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+};
+
 /**
  * Register a new user
  * @param {Object} userData - User data {email, password, firstName, lastName, phone}
@@ -23,7 +29,7 @@ export const registerUser = async (userData) => {
   });
 
   if (existingUser) {
-    throw new Error('User with this email already exists');
+    throw createAppError('User with this email already exists', 409);
   }
 
   // Hash password
@@ -73,18 +79,18 @@ export const loginUser = async (email, password) => {
   });
 
   if (!user) {
-    throw new Error('Invalid email or password');
+    throw createAppError('Invalid email or password', 401);
   }
 
   // Verify password
   const isPasswordValid = await comparePassword(password, user.password);
   if (!isPasswordValid) {
-    throw new Error('Invalid email or password');
+    throw createAppError('Invalid email or password', 401);
   }
 
   // Check if user is active
   if (!user.isActive) {
-    throw new Error('User account is inactive');
+    throw createAppError('User account is inactive', 403);
   }
 
   // Generate tokens
@@ -118,18 +124,18 @@ export const loginAdmin = async (email, password) => {
   });
 
   if (!admin) {
-    throw new Error('Invalid email or password');
+    throw createAppError('Invalid email or password', 401);
   }
 
   // Verify password
   const isPasswordValid = await comparePassword(password, admin.password);
   if (!isPasswordValid) {
-    throw new Error('Invalid email or password');
+    throw createAppError('Invalid email or password', 401);
   }
 
   // Check if admin is active
   if (!admin.isActive) {
-    throw new Error('Admin account is inactive');
+    throw createAppError('Admin account is inactive', 403);
   }
 
   // Generate tokens
@@ -158,7 +164,7 @@ export const refreshAccessToken = async (refreshToken) => {
     const accessToken = generateAccessToken(decoded.userId, decoded.role);
     return { accessToken };
   } catch (error) {
-    throw new Error('Invalid refresh token');
+    throw createAppError('Invalid refresh token', 401);
   }
 };
 
@@ -186,7 +192,7 @@ export const getUserById = async (userId) => {
   });
 
   if (!user) {
-    throw new Error('User not found');
+    throw createAppError('User not found', 404);
   }
 
   return user;

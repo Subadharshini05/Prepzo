@@ -4,14 +4,30 @@
  */
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  const handleSectionNavigation = (sectionId) => {
+    setShowMobileMenu(false);
+
+    if (location.pathname !== '/') {
+      navigate(`/#${sectionId}`);
+      return;
+    }
+
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.replaceState(null, '', `/#${sectionId}`);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -41,12 +57,20 @@ const Navbar = () => {
             <Link to="/" className="text-gray-300 hover:text-green-300 transition font-medium text-sm">
               Home
             </Link>
-            <Link to="#features" className="text-gray-300 hover:text-green-300 transition font-medium text-sm">
+            <button
+              type="button"
+              onClick={() => handleSectionNavigation('features')}
+              className="text-gray-300 hover:text-green-300 transition font-medium text-sm"
+            >
               Features
-            </Link>
-            <Link to="#" className="text-gray-300 hover:text-green-300 transition font-medium text-sm">
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSectionNavigation('about')}
+              className="text-gray-300 hover:text-green-300 transition font-medium text-sm"
+            >
               About
-            </Link>
+            </button>
           </div>
 
           {/* Auth Section */}
@@ -84,14 +108,14 @@ const Navbar = () => {
                       📊 Dashboard
                     </Link>
                     <Link
-                      to="/profile"
+                      to="/dashboard/recommendations"
                       className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition font-medium text-sm"
                       onClick={() => setShowUserMenu(false)}
                     >
-                      👤 Profile
+                      ⭐ Recommendations
                     </Link>
                     <Link
-                      to="/settings"
+                      to="/dashboard/settings"
                       className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition font-medium text-sm"
                       onClick={() => setShowUserMenu(false)}
                     >
@@ -145,15 +169,23 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {showMobileMenu && (
           <div className="md:hidden py-4 border-t border-gray-700/50 bg-gray-900/50 backdrop-blur">
-            <Link to="/" className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition">
+            <Link to="/" onClick={() => setShowMobileMenu(false)} className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition">
               Home
             </Link>
-            <Link to="#features" className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition">
+            <button
+              type="button"
+              onClick={() => handleSectionNavigation('features')}
+              className="w-full text-left px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition"
+            >
               Features
-            </Link>
-            <Link to="#" className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition">
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSectionNavigation('about')}
+              className="w-full text-left px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition"
+            >
               About
-            </Link>
+            </button>
 
             {isAuthenticated && user ? (
               <>
@@ -161,8 +193,8 @@ const Navbar = () => {
                 <Link to="/dashboard" className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition">
                   Dashboard
                 </Link>
-                <Link to="/profile" className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition">
-                  Profile
+                <Link to="/dashboard/recommendations" className="block px-4 py-2 text-gray-300 hover:text-green-300 hover:bg-gray-800/50 transition">
+                  Recommendations
                 </Link>
                 <button
                   onClick={handleLogout}

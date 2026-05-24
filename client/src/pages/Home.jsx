@@ -11,6 +11,14 @@ const Home = () => {
   const navigate = useNavigate();
   const [hoveredFeature, setHoveredFeature] = useState(null);
 
+  const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.replaceState(null, '', `/#${sectionId}`);
+    }
+  };
+
   const features = [
     {
       id: 1,
@@ -18,6 +26,7 @@ const Home = () => {
       title: 'Resume Analysis',
       description: 'AI-powered resume screening to identify weaknesses and optimization opportunities.',
       color: 'from-green-400 to-green-600',
+      route: '/dashboard/resume',
     },
     {
       id: 2,
@@ -25,6 +34,7 @@ const Home = () => {
       title: 'Resume Defense',
       description: 'Master the art of explaining your projects and experiences with confidence.',
       color: 'from-blue-400 to-blue-600',
+      route: '/dashboard/resume-defense',
     },
     {
       id: 3,
@@ -32,6 +42,7 @@ const Home = () => {
       title: 'Communication Training',
       description: 'Improve verbal and non-verbal communication skills for interviews.',
       color: 'from-purple-400 to-purple-600',
+      route: '/dashboard/communication',
     },
     {
       id: 4,
@@ -39,6 +50,7 @@ const Home = () => {
       title: 'Aptitude Preparation',
       description: 'Comprehensive guidance for quantitative reasoning and logical thinking.',
       color: 'from-orange-400 to-orange-600',
+      route: '/dashboard/aptitude',
     },
     {
       id: 5,
@@ -46,6 +58,7 @@ const Home = () => {
       title: 'Technical Fundamentals',
       description: 'Master core DSA, system design, and technical concepts.',
       color: 'from-red-400 to-red-600',
+      route: '/dashboard/coding',
     },
     {
       id: 6,
@@ -53,6 +66,7 @@ const Home = () => {
       title: 'Coding Practice',
       description: 'Practice problems from top companies with real-time feedback.',
       color: 'from-cyan-400 to-cyan-600',
+      route: '/dashboard/coding',
     },
     {
       id: 7,
@@ -60,6 +74,7 @@ const Home = () => {
       title: 'Personalized Roadmaps',
       description: 'AI-generated learning paths tailored to your strengths and weaknesses.',
       color: 'from-pink-400 to-pink-600',
+      route: '/dashboard/recommendations',
     },
     {
       id: 8,
@@ -67,6 +82,7 @@ const Home = () => {
       title: 'Weak Area Detection',
       description: 'Automatic identification and focused training on skill gaps.',
       color: 'from-yellow-400 to-yellow-600',
+      route: '/dashboard/recommendations',
     },
     {
       id: 9,
@@ -74,6 +90,7 @@ const Home = () => {
       title: 'HR & Behavioral Prep',
       description: 'Ace HR rounds with situational awareness and behavioral frameworks.',
       color: 'from-indigo-400 to-indigo-600',
+      route: '/dashboard/communication',
     },
   ];
 
@@ -113,7 +130,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div id="home" className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Hero Section */}
       <div className="relative overflow-hidden py-20 sm:py-32">
         {/* Background gradient orbs */}
@@ -146,6 +163,7 @@ const Home = () => {
               <Button
                 variant="outline"
                 size="lg"
+                onClick={() => scrollToSection('features')}
                 className="border-2 border-green-400 text-green-300 hover:bg-green-400/10"
               >
                 View Demo
@@ -174,7 +192,7 @@ const Home = () => {
       </div>
 
       {/* Problem Statement Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 mb-20">
+      <div id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 mb-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             The Challenge Students Face
@@ -199,7 +217,7 @@ const Home = () => {
       </div>
 
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             Complete Placement Ecosystem
@@ -215,6 +233,7 @@ const Home = () => {
               key={feature.id}
               onMouseEnter={() => setHoveredFeature(feature.id)}
               onMouseLeave={() => setHoveredFeature(null)}
+              onClick={() => navigate(feature.route)}
               className="group relative rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur overflow-hidden hover:border-green-500/50 transition-all duration-300 cursor-pointer"
             >
               {/* Gradient overlay on hover */}
@@ -268,7 +287,7 @@ const Home = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0%, 100% {
             transform: translate(0, 0) scale(1);
