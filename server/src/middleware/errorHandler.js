@@ -16,7 +16,7 @@ export const notFound = (req, res, next) => {
  * Global Error Handler
  */
 export const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  const statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
   const isDevelopment = process.env.NODE_ENV === 'development';
 
   res.status(statusCode).json({

@@ -34,7 +34,11 @@ const ProtectedRoute = ({ element: Element, requiredRole = null }) => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return Element ? <Element /> : <Outlet />;
+  if (Element) {
+    return React.isValidElement(Element) ? Element : <Element />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
